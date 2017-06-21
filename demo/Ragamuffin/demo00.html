@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.min.js"></script>
+  <script src="../../Plugins/snap.svg.js"></script>
+  <script src="../../js/NekoNecode.js"></script>
+  <script src="../../js/DevonRex.js"></script>
+  <script src="../../js/Ragamuffin.js"></script>
+  <style>
+    body{
+      font-size: 10px;
+    }
+    svg {border:1px solid #000};
+  </style>
+  <title>SVG</title>
+</head>
+<body>
+  <br><br><br><br><br><br><br><br>
+  <div id="sample"></div>
+  <div id="gui">
+    <input id="prog" />
+    <div id="page"></div>
+    <button id="back">戻る</button>
+    <button id="next">次へ</button>
+    <button id="play">
+  </div>
+<script>
+//==============================================================================
+// Ragamuffin
+//==============================================================================
+UNIT ={
+  BOX     : 0,
+  CIRCLE  : 1,
+  TEXT    : 2,
+  STAR    : 3,
+  LINE    : 4,
+  CLINE   : 5,
+  ARK     : 6,
+  GRID    : 7,
+};
+var data = {
+  id:"sample",
+  gui:{
+    root:{id:"gui"},              // at div tag
+    prog:{id:"prog", step:0.001}, // at input tag
+    back:{id:"back"},             // at button tag
+    next:{id:"next"},             // at button tag
+    play:{id:"play"},             // at button tag
+    page:{id:"page"},             // at any tag
+  },
+  food:{
+    view:{
+      size:{w:1000, h:600},
+      vbox:[0, 0, 1000, 600],
+    },
+
+    // unit:{
+    //   cir1 :{type:UNIT.CIRCLE},
+    //   box1 :{type:UNIT.BOX},
+    //   box2 :{type:UNIT.BOX},
+    //   tex1 :{type:UNIT.TEXT},
+    //   sta1 :{type:UNIT.STAR},
+    //   line :{type:UNIT.LINE},
+    //   cline:{type:UNIT.CLINE},
+    //   ark  :{type:UNIT.ARK},
+    //   grid :{type:UNIT.GRID},
+    // },
+    // note:{
+    //   section:[
+    //     {
+    //       box1:{x:200, y:250, w:100, h:100, rx:20, ry:50, sw:10, tx:"box1", txsw:10, txa:"start", a:-360, ga:0},
+    //       box2:{x:450, y:450, w:50, h:50, tx:"box2", fill:"#f0f", stroke:"#0f0"},
+    //       cir1:{x:450, y:400, r:5, tx:"cir1", a:0},
+    //       tex1:{x:0, y:0, tx:"aaaaaaaaaaaaaaaaaaa", txa:"start", txb:"hanging", a:0, fill:"#f00"},
+    //       sta1:{x:100, y:100, w:100, h:100, v:15, r:50, a:-1000},
+    //       line:{x:100, y:100, w:100, h:100},
+    //       cline:{x:100, y:100, w:100, h:100},
+    //       ark:{x:500, y:100, w:90, h:90, r:50},
+    //       grid:{x:500, y:200, w:300, h:300, rx:10},
+    //     },
+    //     {
+    //       box1:{x:150, y:250, w:200, h:100, tx:"hoge", a:0},
+    //       box2:{x:0, y:0, w:50, h:50, fill:"rgba(200, 0, 0, 0.4)", stroke:"#f0f"},
+    //       cir1:{x:450, y:50, r:100, tx:"cir1", a:360},
+    //       tex1:{x:250, y:250, tx:"aaaaaaaaaaaaaaaaaaa", a:360},
+    //       sta1:{x:100, y:100, w:100, h:100, v:5, r:30, fill:"#f00"},
+    //       line:{x:100, y:100, w:200, h:200},
+    //       cline:{x:100, y:100, w:100, h:100},
+    //       ark:{x:500, y:100, w:90, h:200, r:50},
+    //       grid:{x:500, y:200, w:300, h:500, rx:20},
+    //     },
+    //     {
+    //       box1:{x:0, y:400, w:100, h:100},
+    //       box2:{x:450, y:0, w:50, h:50},
+    //       cir1:{x:450, y:450, w:50, h:50},
+    //     },
+    //     {
+    //       box1:{x:300, y:300, w:200, h:200},
+    //       box2:{x:300, y:300, w:200, h:200},
+    //       cir1:{x:450, y:450, w:50, h:50},
+    //     }
+    //   ],
+    //   page:[
+    //     {sections:[0,1], rates:[1]},
+    //     {sections:[0,1,2], rates:[0.2, 0.8]},
+    //     {sections:[0], rates:[]},
+    //   ],
+    // },
+  },
+};
+
+// サンプルデータ
+function setSample(d){
+  d.food.unit = {
+    cir1 :{type:UNIT.CIRCLE},
+    box1 :{type:UNIT.BOX},
+    box2 :{type:UNIT.BOX},
+    tex1 :{type:UNIT.TEXT},
+    sta1 :{type:UNIT.STAR},
+    line :{type:UNIT.LINE},
+    cline:{type:UNIT.CLINE},
+    ark  :{type:UNIT.ARK},
+    grid :{type:UNIT.GRID},
+  };
+
+  d.food.note = {
+    section:[
+      {
+        box1:{x:200, y:250, w:100, h:100, rx:20, ry:50, sw:10, tx:"box1", txsw:10, txa:"start", a:-360, ga:0},
+        box2:{x:450, y:450, w:50, h:50, tx:"box2", fill:"#f0f", stroke:"#0f0"},
+        cir1:{x:450, y:400, r:5, tx:"cir1", a:0},
+        tex1:{x:0, y:0, tx:"aaaaaaaaaaaaaaaaaaa", txa:"start", txb:"hanging", a:0, fill:"#f00"},
+        sta1:{x:100, y:100, w:100, h:100, v:15, r:50, a:-1000},
+        line:{x:100, y:100, w:100, h:100},
+        cline:{x:100, y:100, w:100, h:100},
+        ark:{x:500, y:100, w:90, h:90, r:50},
+        grid:{x:500, y:200, w:300, h:300, rx:10},
+      },
+      {
+        box1:{x:150, y:250, w:200, h:100, tx:"hoge", a:0},
+        box2:{x:0, y:0, w:50, h:50, fill:"rgba(200, 0, 0, 0.4)", stroke:"#f0f"},
+        cir1:{x:450, y:50, r:100, tx:"cir1", a:360},
+        tex1:{x:250, y:250, tx:"aaaaaaaaaaaaaaaaaaa", a:360},
+        sta1:{x:100, y:100, w:100, h:100, v:5, r:30, fill:"#f00"},
+        line:{x:100, y:100, w:200, h:200},
+        cline:{x:100, y:100, w:100, h:100},
+        ark:{x:500, y:100, w:90, h:200, r:50},
+        grid:{x:500, y:200, w:300, h:500, rx:20},
+      },
+      {
+        box1:{x:0, y:400, w:100, h:100},
+        box2:{x:450, y:0, w:50, h:50},
+        cir1:{x:450, y:450, w:50, h:50},
+      },
+      {
+        box1:{x:300, y:300, w:200, h:200},
+        box2:{x:300, y:300, w:200, h:200},
+        cir1:{x:450, y:450, w:50, h:50},
+      }
+    ],
+    page:[
+      {sections:[0,1], rates:[1]},
+      {sections:[0,1,2], rates:[0.2, 0.8]},
+      {sections:[0], rates:[]},
+    ],
+  };
+};
+
+// BOXテストデータ
+function setTestBox(d){
+  d.food.unit = {
+    box1 :{type:UNIT.BOX},
+    box2 :{type:UNIT.BOX},
+    box3 :{type:UNIT.BOX},
+    box4 :{type:UNIT.BOX},
+  };
+
+  d.food.note = {
+    section:[
+      {
+        box1:{
+          rect:{ x:0, y:0, w:100, h:100, easeXY:"linear", easeWH:"outBackCubic"},
+          // text:{ text:"box1" }
+        },
+        box2:{
+          common:{opacity:0},
+          rect:{ x:110, y:0, w:100, h:100, easeXY:"inBackCubic" },
+          text:{ text:"box2" }
+        },
+        box3:{
+          common:{angle:0, easeAngle:"inBackCubic"},
+          rect:{ x:220, y:0, w:100, h:100},
+          text:{
+            text:"box3", valign:"top", baseline:"hanging", offsetY:5, size:30,
+            style:{fill:"#f00"}
+          }
+        },
+        box4:{
+          rect:{ x:330, y:0, w:100, h:100, easeWH:"inBackCubic"},
+          style:{
+            fill:"#00f", stroke:"#f0f", width:5, join:"round",
+            cap:"round",
+          },
+          text:{text:0, type:"int", size:30, family:"Times New Roman", style:{fill:"#fff"}}
+        },
+      },
+      {
+        box1:{
+          rect:{ x:0, y:450, w:110, h:110, r:55 },
+          text:{ text:"box1" }
+        },
+        box2:{
+          rect:{ x:110, y:450, w:100, h:100, easeXY:"inBackCubic" },
+        },
+        box3:{
+          common:{angle:1080},
+          rect:{ x:220, y:0, w:100, h:100},
+        },
+        box4:{
+          rect:{ x:330, y:300, w:300, h:100},
+          style:{
+            fill:"none", stroke:"rgba(0, 0, 255, 1.0)",
+            dasharray:[0,10],
+            cap:"round",
+            width:5
+          },
+          text:{text:100, style:{fill:"#000"}}
+        },
+      },
+    ],
+    page:[
+      {sections:[0,1], rates:[1]},
+    ],
+  };
+};
+
+// CIRCLEテストデータ
+function setTestCircle(d){
+  d.food.unit = {
+    cir1 :{type:UNIT.CIRCLE},
+  };
+
+  d.food.note = {
+    section:[
+      {
+        cir1:{
+          common:{angle:360},
+          circle:{ cx:100, cy:100, rx:100, ry:100, easeXY:"inBackCubic", easeR:"outBackCubic" },
+          text:{
+            text:0.00, type:"float", radix:3,
+            align:"right", valign:"bottom",
+            anchor:"middle", baseline:"hanging",
+            style:{fill:"#f00"}
+          },
+          style:{fill:"#0ff", dasharray:10}
+        }
+      },
+      {
+        cir1:{
+          circle:{ cx:300, cy:200, rx:200, ry:100 },
+          text:{
+            text:123.456, align:"right", valign:"bottom",
+            anchor:"middle", baseline:"hanging",
+            style:{fill:"#0ff"
+          }
+        },
+          style:{fill:"#999"}
+        },
+      },
+    ],
+    page:[
+      {sections:[0,1], rates:[1]},
+    ],
+  };
+};
+
+// TEXTテストデータ
+function setTestText(d){
+  d.food.unit = {
+    line1 :{type:UNIT.LINE},
+    tex1 :{type:UNIT.TEXT},
+  };
+
+  d.food.note = {
+    section:[
+      {
+
+        tex1:{
+          // テキスト
+          self:{easeXY:"inBackCubic"},
+          text:{
+            text:"Ragamuffin", size:100,
+            style:{fill:"#f00"}
+          },
+          // ライン
+        },
+        line1:{
+          path:{path:"M50,50 L950, 550", start:0, end:1.0, easePath:"inBackCubic"},
+          markerStart:{ marker:"dot", fill:"none", stroke:"#000", size:30 },
+          markerMid:{ marker:"dot", fill:"none", stroke:"#000", size:30 },
+          markerEnd:{ marker:"dot", fill:"none", stroke:"#000", size:30 },
+        },
+      },
+      {
+        tex1:{
+          self:{type:"path", x:100, y:100},
+          text:{
+            text:"Ragamuffin", size:100,
+            style:{fill:"none"},
+          },
+          path:{path:"M100,100 r200,200, 500, 300", start:0.5, end:0.5}
+        },
+        line1:{
+          path:{path:"M50,50 L950,550,950,50z", start:0, end:0, easePath:"outBackCubic"},
+          markerStart:{ marker:"dot", fill:"#00f" },
+          markerMid:{ marker:"dot", fill:"none", stroke:"#000", size:30 },
+          markerEnd:{ marker:"dot", fill:"none", stroke:"#000", size:30 },
+        },
+      },
+      {
+        tex1:{
+          self:{type:"path"},
+          text:{text:"Ragamuffin", size:100, style:{fill:"#fff", stroke:"#000"}},
+          path:{path:"M100,100 r200,200, 500, 300", end:1}
+        },
+        line1:{
+          style:{fill:"#f00"},
+          path:{path:"M50,550 L950,50,50,50z", start:0, end:1.0},
+          markerStart:{ marker:"dot", fill:"#00f" },
+          markerMid:{ marker:"dot", fill:"none", stroke:"#000", size:30 },
+          markerEnd:{ marker:"dot", fill:"none", stroke:"#000", size:30 },
+        },
+      },
+    ],
+    page:[
+      {sections:[0,1,2], rates:[0.5, 0.5]},
+    ],
+  };
+};
+
+// STARテストデータ
+function setTestStar(d){
+  d.food.unit = {
+    sta1 :{type:UNIT.STAR},
+  };
+
+  d.food.note = {
+    section:[
+      {
+        sta1:{
+          common:{angle:360},
+          style:{fill:"#f00"},
+          rect:{x:100, y:100, easeXY:"linear", easeWH:"inBackCubic", easeR:"inBackCubic"}
+        },
+      },
+      {
+        sta1:{
+          style:{fill:"#ff0"},
+          rect:{x:200, y:200, w:200, h:200, rx:60, ry:60}
+        },
+      },
+    ],
+    page:[
+      {sections:[0,1], rates:[1]},
+    ],
+  };
+};
+
+// FIXLINEテストデータ
+function setTestLine(d){
+  d.food.unit = {
+    line1 :{type:UNIT.LINE},
+    line2 :{type:UNIT.LINE},
+  };
+
+  d.food.note = {
+    section:[
+      {
+        line1:{
+          path:{path:"M100, 100, L900,100", start:0, end:0},
+          markerStart:{ marker:"dot" },
+          markerEnd:{ marker:"arrow", size:20},
+        },
+        line2:{
+          path:{path:"M100,100 R100,400,330,50,360,500,600,100,600,400,900,500", start:0, end:0},
+          markerStart:{ marker:"dot" },
+          markerMid:{marker:"square", size:15, fill:"#f0f"},
+          markerEnd:{ marker:"arrow", size:20},
+        },
+      },
+      {
+        line1:{
+          path:{path:"M100, 100, L900,500", start:0, end:1.0},
+          markerStart:{ marker:"dot", fill:"#f00"},
+          markerEnd:{ marker:"arrow", fill:"#0ff", size:20},
+        },
+        line2:{
+          path:{path:"M100,100 R100,400,330,50,360,500,600,100,600,400,900,500",start:0, end:1.0},
+          markerStart:{ marker:"dot" },
+          markerMid:{marker:"square", fill:"#0f0"},
+          markerEnd:{ marker:"arrow", size:20},
+        },
+      },
+    ],
+    page:[
+      {sections:[0,1], rates:[1]},
+    ],
+  };
+};
+
+// CLINEテストデータ
+function setTestCline(d){
+  d.food.unit = {
+    cline1 :{type:UNIT.CLINE},
+  };
+
+  d.food.note = {
+    section:[
+      {
+        cline1:{
+          circle:{ cx:500, cy:300, rx:150, ry:100, start:0, end:0, easeSE:"outBackCubic" },
+          markerStart:{ marker:"dot" },
+          markerMid:{marker:"cross", size:15, fill:"#f0f"},
+          markerEnd:{ marker:"arrow", size:20},
+        },
+      },
+      {
+        cline1:{
+          circle:{ cx:500, cy:300, rx:150, ry:100, start:0, end:359.99 },
+          markerStart:{ marker:"dot" },
+          markerMid:{marker:"square", size:15, fill:"#f0f"},
+          markerEnd:{ marker:"arrow", size:20},
+        },
+      },
+    ],
+    page:[
+      {sections:[0,1], rates:[1]},
+    ],
+  };
+};
+
+// 円弧テストデータ
+function setTestArk(d){
+  d.food.unit = {
+    ark1 :{type:UNIT.ARK},
+  };
+
+  d.food.note = {
+    section:[
+      {
+        ark1:{
+          common:{ angle:0, acx:0, acy:0, opacity:1},
+          style:{fill:"#ff0"},
+          circle:{ cx:100, cy:100, r:100, start:0, end:0, easeSE:"outBackCubic" },
+        },
+      },
+      {
+        ark1:{
+          common:{ angle:0, acx:0, acy:0, opacity:1},
+          style:{fill:"#0ff"},
+          circle:{ cx:500, cy:300, rx:300, ry:50, start:0, end:670 },
+        },
+      },
+      {
+        ark1:{
+          common:{ angle:0, acx:0, acy:0, opacity:1},
+          style:{fill:"#fff"},
+          circle:{ cx:500, cy:300, rx:300, ry:50, start:0, end:670 },
+        },
+      },
+      {
+        ark1:{
+          common:{ angle:0, acx:0, acy:0, opacity:1},
+          style:{fill:"#f0f"},
+          circle:{ cx:500, cy:300, rx:300, ry:50, start:0, end:670 },
+        },
+      },
+      {
+        ark1:{
+          common:{ angle:0, acx:0, acy:0, opacity:1},
+          style:{fill:"#0ff"},
+          circle:{ cx:500, cy:300, rx:300, ry:50, start:0, end:670 },
+        },
+      },
+      {
+        ark1:{
+          common:{ angle:0, acx:0, acy:0, opacity:1},
+          style:{fill:"#ff0"},
+          circle:{ cx:500, cy:300, rx:300, ry:50, start:0, end:90 },
+        },
+      },
+    ],
+    page:[
+      {sections:[0,1,2,3,4,5], rates:[0.2,0.2,0.2,0.2,0.2]},
+    ],
+  };
+};
+
+// グリッドテストデータ
+function setTestGrid(d){
+  d.food.unit = {
+    grid1 :{type:UNIT.GRID},
+    box1:{type:UNIT.BOX},
+  };
+
+  d.food.note = {
+    section:[
+      {
+        grid1:{
+          common:{ angle:0, acx:0, acy:0, opacity:1},
+          style:{stroke:"#000", dasharray:5, width:1, fill:"none"},
+          rect:{ x:0, y:0, w:1000, h:600, rx:10, ry:10 },
+          self:{
+            axisX:0, axisY:0,
+          },
+        },
+        box1:{
+          rect:{x:0, y:0, w:100, h:100}
+        },
+      },
+      {
+        grid1:{
+          common:{ angle:0, acx:0, acy:0, opacity:1},
+          rect:{ x:0, y:0, w:200, h:200, rx:10, ry:10 },
+        },
+        box1:{},
+      },
+    ],
+    page:[
+      {sections:[0,1], rates:[1]},
+    ],
+  };
+};
+
+// サンプル１
+function setSample01(d){
+  d.food.unit = {
+    box1:{type:UNIT.BOX},
+    box2:{type:UNIT.BOX},
+    box3:{type:UNIT.BOX},
+    box4:{type:UNIT.BOX},
+    fan1:{type:UNIT.ARK},
+  };
+
+  d.food.note = {
+    section:[
+      {
+        box1:{
+          rect:{x:0, y:0, w:100, h:100},
+          text:{text:"1"}
+        },
+      },
+      {
+        box1:{
+          rect:{x:0, y:0, w:100, h:100},
+          text:{text:"1"}
+        },
+        box2:{
+          rect:{x:0, y:0, w:100, h:100},
+          text:{text:"2"}
+        },
+      },
+      {
+        box1:{
+          rect:{x:0, y:0, w:100, h:100},
+          text:{text:"1"}
+        },
+        box2:{
+          rect:{x:0, y:100, w:100, h:100},
+          text:{text:"2"}
+        },
+        box3:{
+          rect:{x:0, y:100, w:100, h:100},
+          text:{text:"3"}
+        },
+      },
+      {
+        box1:{
+          rect:{x:0, y:0, w:100, h:100},
+          text:{text:"1"}
+        },
+        box2:{
+          rect:{x:0, y:100, w:100, h:100},
+          text:{text:"2"}
+        },
+        box3:{
+          rect:{x:100, y:100, w:100, h:100},
+          text:{text:"3"}
+        },
+        box4:{
+          rect:{x:100, y:100, w:100, h:100},
+          text:{text:"4"}
+        },
+      },
+      {
+        box1:{
+          rect:{x:0, y:0, w:100, h:100},
+          text:{text:"1"}
+        },
+        box2:{
+          rect:{x:0, y:100, w:100, h:100},
+          text:{text:"2"}
+        },
+        box3:{
+          rect:{x:100, y:100, w:100, h:100},
+          text:{text:"3"}
+        },
+        box4:{
+          rect:{x:100, y:200, w:100, h:100},
+          text:{text:"4"}
+        },
+      },
+      {
+        box1:{
+          rect:{x:0, y:0, w:100, h:100},
+          style:{fill:"#f00"},
+          text:{text:"1"}
+        },
+        box2:{
+          rect:{x:0, y:100, w:100, h:100},
+          style:{fill:"#0f0"},
+          text:{text:"2"}
+        },
+        box3:{
+          rect:{x:100, y:100, w:100, h:100},
+          style:{fill:"#00f"},
+          text:{text:"3"}
+        },
+        box4:{
+          rect:{x:100, y:200, w:100, h:100},
+          style:{fill:"#f0f"},
+          text:{text:"4"}
+        },
+        fan1:{
+          common:{ angle:0, acx:0, acy:0, opacity:1},
+          style:{fill:"#ff0"},
+          circle:{ cx:500, cy:300, rx:300, ry:50, start:0, end:0, easeSE:"inBackCubic" },
+        },
+      },
+      {
+        box1:{
+          rect:{x:0, y:0, w:100, h:100},
+          style:{fill:"#f00"},
+          text:{text:"1"}
+        },
+        box2:{
+          rect:{x:900, y:0, w:100, h:100},
+          style:{fill:"#0f0"},
+          text:{text:"2"}
+        },
+        box3:{
+          rect:{x:0, y:500, w:100, h:100},
+          style:{fill:"#00f"},
+          text:{text:"3"}
+        },
+        box4:{
+          rect:{x:900, y:500, w:100, h:100},
+          style:{fill:"#f0f"},
+          text:{text:"4"}
+        },
+        fan1:{
+          common:{ angle:0, acx:0, acy:0, opacity:1},
+          style:{fill:"#ff0"},
+          circle:{ cx:500, cy:300, rx:300, ry:50, start:359.99, end:359.99},
+        },
+      },
+      {}
+    ],
+    page:[
+      {sections:[0,1,2,3,4,5,6], rates:[0.15,0.15,0.15,0.15,0.1,0.3]},
+    ],
+  };
+};
+
+// サンプル１
+function setSample02(d){
+  d.food.unit = {
+    cline:{type:UNIT.CLINE},
+    line:{type:UNIT.LINE},
+    ark:{type:UNIT.ARK},
+    ark2:{type:UNIT.ARK},
+  };
+
+  d.food.note = {
+    section:[
+      {
+        cline:{
+          circle:{ cx:500, cy:300, r:150, start:0, end:0 },
+          markerEnd:{ marker:"arrow" },
+          // markerMid:{marker:"cross", size:15, fill:"#f0f"},
+          // markerEnd:{ marker:"arrow", size:20},
+        },
+        line:{
+          path:{path:"M500,100, v400, M300,300 h400", start:0, end:1.0},
+        },
+        ark:{
+          circle:{cx:500, cy:300, r:40, start:0, end:0 },
+          style:{fill:"rgba(255, 0, 0, 0.2)", stroke:"none"},
+        },
+        ark2:{
+          circle:{cx:500, cy:300, r:180, start:0, end:0 },
+          style:{fill:"none", stroke:"#000"},
+        },
+      },
+      {
+        cline:{
+          circle:{ cx:500, cy:300, r:150, start:0, end:359.99 },
+          markerStart:{ marker:"arrow" },
+          // markerMid:{marker:"cross", size:15, fill:"#f0f"},
+          // markerEnd:{ marker:"arrow", size:20},
+        },
+        line:{
+          path:{path:"M500,100, v400, M300,300 h400", start:0, end:1.0},
+        },
+        ark:{
+          circle:{cx:500, cy:300, r:40, start:0, end:359.99},
+          style:{fill:"rgba(255, 0, 0, 0.2)", stroke:"none"},
+        },
+        ark2:{
+          circle:{cx:500, cy:300, r:180, start:359.99, end:359.99},
+          style:{fill:"none", stroke:"#000"},
+        },
+      },
+      {
+        cline:{
+          circle:{ cx:500, cy:300, r:150, start:0, end:120 },
+          markerStart:{ marker:"arrow" },
+          // markerMid:{marker:"cross", size:15, fill:"#f0f"},
+          // markerEnd:{ marker:"arrow", size:20},
+        },
+        line:{
+          path:{path:"M500,100, v400, M300,300 h400", start:0, end:1.0},
+        },
+        ark:{
+          circle:{cx:500, cy:300, r:40, start:0, end:120},
+          style:{fill:"rgba(255, 0, 0, 0.2)", stroke:"none"},
+        },
+        ark2:{
+          circle:{cx:500, cy:300, r:180, start:120, end:120},
+          style:{fill:"none", stroke:"#000"},
+        },
+      },
+    ],
+    page:[
+      {sections:[0,1], rates:[1], duration:3000},
+      {sections:[0,1], rates:[1]},
+      {sections:[0,2], rates:[1]},
+      {sections:[1,2], rates:[1], duration:5000},
+
+
+    ],
+  };
+};
+//setSample(data);
+//setTestBox(data);
+//setTestCircle(data);
+//setTestText(data);
+//setTestStar(data);
+//setTestLine(data);
+//setTestCline(data);
+//setTestArk(data);
+//setTestGrid(data);
+setSample02(data);
+
+var rag = NekoNecode.Cats.get("Ragamuffin").create("sample").load(data);
+
+var dev = NekoNecode.Cats.get("DevonRex").create();
+dev.add("Ragamuffin", rag);
+</script>
+</body>
+</html>

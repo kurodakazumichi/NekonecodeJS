@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>Ragamuffin Lab</title>
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/earlyaccess/roundedmplus1c.css">
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script src="./Plugins/snap.svg.js"></script>
+  <script src="./js/NekoNecode.js"></script>
+  <script src="./js/Ragamuffin.js"></script>
+  <script src="./js/RagamuffinFoods.js"></script>
+  <style>
+    body{font-family     :'Rounded Mplus 1c', serif;  }
+
+  </style>
+</head>
+<body>
+
+<div id="sample"></div>
+<script>
+var raga = NekoNecode.Cats.get("Ragamuffin").create();
+raga.init({
+  id:"sample",
+  food:{},
+});
+
+NekoNecode.Cats.get("RagamuffinFoods").create(raga);
+</script>
+</body>
+</html>

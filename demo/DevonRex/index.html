@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>DevonRex Demo</title>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.min.js"></script>
+    <script src="../../js/NekoNecode.js"></script>
+    <script src="../../js/DevonRex.js"></script>
+</head>
+<body>
+
+<div id="sample"></div>
+<script>
+
+var obj = {
+  num1:10,
+  num2:20,
+  str1:"hogehoge",
+  obj1 : {a:1, b:2},
+  get prop1() { this.num1; }
+};
+
+var dev = NekoNecode.Cats.get("DevonRex").create();
+dev.add("obj", obj);
+</script>
+</body>
+</html>
